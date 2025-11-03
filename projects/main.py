@@ -129,10 +129,11 @@ async def user_update(
 
 @app.put('/users/', response_model=UserOut, dependencies=[Depends(get_current_active_user)])
 async def user_update(
+	user_id: int,
 	update_data: UserAdminUpdate,
 	session: Annotated[Session, Depends(get_session)]
 ):
-	user = session.get(User, update_data.id)
+	user = session.get(User, user_id)
 
 	if not user:
 		raise HTTPException(status_code=404, detail='User not found.')
@@ -217,8 +218,8 @@ async def fetch_land_info(*,
 	return lands
 
 @app.patch('/lands/', dependencies=[Depends(authorize_user(RoleEnum.admin))], response_model=LandOut)
-async def update_land_info(update_data: LandUpdate, session: Annotated[Session, Depends(get_session)]):
-	land = session.get(Land, update_data.id)
+async def update_land_info(land_id:int, update_data: LandUpdate, session: Annotated[Session, Depends(get_session)]):
+	land = session.get(Land, land_id)
 
 	if not land:
 		raise HTTPException(status_code=404, detail='Land not Found.')
@@ -297,11 +298,12 @@ async def broadcast(*,
 
 @app.patch('/chats/', response_model=ChatOut)
 async def update_chat(
+	chat_id: int,
 	user: Annotated[User, Depends(get_current_active_user)],
 	update_data: ChatUpdate,
 	session: Annotated[Session, Depends(get_session)]
 ):
-	chat = session.get(Chat, update_data.id)
+	chat = session.get(Chat, chat_id)
 
 	if chat.id != user.id:
 		raise HTTPException(status_code=405, detail='Not authorize.')
