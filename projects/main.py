@@ -204,9 +204,9 @@ async def fetch_land_info(*,
 	if location:
 		stmt = stmt.where(Land.location == location)
 	if size_lesser:
-		stmt = stmt.where(Land.size_lesser == size_lesser)
+		stmt = stmt.where(Land.size_lesser < size_lesser)
 	if size_greater:
-		stmt = stmt.where(size_greater == size_greater)
+		stmt = stmt.where(size_greater > size_greater)
 	
 	lands = session.exec(
 		stmt.offset(skip).limit(limit)
