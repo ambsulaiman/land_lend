@@ -3,7 +3,7 @@ import os
 
 
 sqlite_url = os.getenv('SQLITE_URL', 'sqlite:///land_lend.db')
-engine = create_engine(sqlite_url, echo=True)
+engine = create_engine(sqlite_url)
 
 #################################################################################################
 # To use postgresql database: download postgres server and psql-cli and uncomment postgresql_url
