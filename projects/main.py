@@ -159,6 +159,20 @@ async def delete_user(
 
 	return {'msg': 'Deleted successfully!.', 'ok': True}
 
+@app.delete('/users/{user_id}', response_model=dict[str, str | bool], dependencies=[Depends(get_current_active_user)])
+async def delete_user(
+	user_id: int,
+	session: Annotated[Session, Depends(get_session)]
+):
+	user = session.get(User, user_id)
+	if not user:
+		raise HTTPException(status_code=404, detail='User not found.')
+
+	session.delete(user)
+	session.commit()
+
+	return {'msg': f'Deleted user with id={user_id} successfully!.', 'ok': True}
+
 
 
 @app.post('/lands/', status_code=201, dependencies=[Depends(authorize_user([RoleEnum.admin]))])
@@ -235,13 +249,16 @@ async def update_land_info(land_id:int, update_data: LandUpdate, session: Annota
 
 	return land
 
-@app.delete('/lands/')
+@app.delete('/lands/{land_id}')
 async def delete_land_info(
 	land_id: int,
-	user: Annotated[User, Depends(get_current_active_user)],
+	user: Annotated[User, Depends(authorize_user(RoleEnum.admin))],
 	session: Annotated[Session, Depends(get_session)]
 ):
 	land = session.get(Land, land_id)
+	if not land:
+		raise HTTPException(status_code=404, detail='Land not found.')
+		
 	if land.id != user.id:
 		raise HTTPException(status_code=404, detail='Not Found.')
 
@@ -323,13 +340,16 @@ async def update_chat(
 	return chat
 
 
-@app.delete('/chats/')
+@app.delete('/chats/{chat_id}')
 async def delete_chat(
 	chat_id: int,
 	user: Annotated[User, Depends(get_current_active_user)],
 	session: Annotated[Session, Depends(get_session)]
 ):
 	chat = session.get(Chat, chat_id)
+	if not chat:
+		raise HTTPException(status_code=404, detail='Chat not found.')
+
 	if chat.id != user.id:
 		raise HTTPException(status_code=404, detail='Not Found.')
 
