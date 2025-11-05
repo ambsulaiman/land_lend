@@ -1,8 +1,11 @@
 from sqlmodel import SQLModel, Field, Relationship
 from pydantic import EmailStr
 from datetime import datetime
-from .enums import RoleEnum
+from .enums import RoleEnum, IntendedUserEnum
 
+################
+## User
+################
 
 class UserLandLink(SQLModel, table=True):
 	user_id: int | None = Field(default=None, primary_key=True, foreign_key='user.id')
@@ -15,7 +18,6 @@ class UserBase(SQLModel):
 	email: EmailStr = Field(index=True)
 	address: str
 	phone_number: str
-	
 
 class User(UserBase, table=True):
 	id: int | None = Field(default=None, primary_key=True)
@@ -46,43 +48,77 @@ class UserAdminUpdate(SQLModel):
 	role: RoleEnum | None = None
 	disabled: bool
 
+class UserOutWithLands(UserOut):
+	lands: list['LandOut']
+
+
 ################
 ## Land
 ################
 
-# helper nest class Image.
-# class Image(SQLModel):
-# 	name: str
-# 	url: HttpUrl
-
 class LandBase(SQLModel):
 	model_config = {'extra': 'forbid'}
+
 	name: str = Field(index=True)
 	address: str = Field(index=True)
 	size: float | None = None
 	location: str
 	description: str | None = Field(default=None, index=True)
-	url: str
-
 
 class Land(LandBase, table=True):
 	id: int | None = Field(default=None, primary_key=True)
 	lenders: list[User] = Relationship(back_populates='lands', link_model=UserLandLink)
+
+	images: list['Image'] = Relationship(back_populates='land', cascade_delete=True)
 
 class LandIn(LandBase):
 	pass
 
 class LandOut(LandBase):
 	id: int
+	images: list['ImageOut']
 
 class LandUpdate(SQLModel):
 	model_config = {'extra': 'forbid'}
+
 	name: str | None = None
 	address: str | None = None
 	size: float | None = None
 	location: str | None = None
 	description: str | None = None
-	url: str | None = None
+
+class LandOutWithUsers(LandOut):
+	lenders: list[UserOut]
+
+
+################
+## Images
+################
+
+class ImageBase(SQLModel):
+	model_config = {'extra': 'forbid'}
+
+	label: str = Field(index=True)
+
+class Image(ImageBase, table=True):
+	id: int | None = Field(default=None, primary_key=True)
+	url: str
+
+	land_id: int = Field(foreign_key='land.id')
+	land: Land = Relationship(back_populates='images')
+
+class ImageIn(ImageBase):
+	land_id: int | None = None
+
+class ImageOut(ImageBase):
+	id: int
+	url: str
+
+class ImagesUpdate(SQLModel):
+	model_config = {'extra': 'forbid'}
+
+	label: str | None = None
+	
 
 ################
 ## Chat
@@ -90,9 +126,10 @@ class LandUpdate(SQLModel):
 
 class ChatBase(SQLModel):
 	model_config = {'extra': 'forbid'}
+
 	msg: str
-	receiver_id: int | None = Field(default=None, foreign_key='user.id')
-	intended_user: RoleEnum | None = None
+	reciever_id: int | None = None
+	intended_user: IntendedUserEnum
 
 	sender_id: int | None = Field(default=None, foreign_key='user.id')
 
@@ -110,4 +147,13 @@ class ChatOut(ChatBase):
 class ChatUpdate(SQLModel):
 	model_config = {'extra': 'forbid'}
 	msg: str | None = None
-	intended_user: RoleEnum | None = None
+	intended_user: IntendedUserEnum | None = None
+	reciever_id: int | None = None
+
+#################
+## Token
+#################
+
+class Token(SQLModel):
+	access_token: str
+	token_type: str

@@ -34,6 +34,12 @@ if [ -n ALGORITHM ]; then
     echo 'Set ALGORITHM env'
 fi
 
+if [ -n LAND_LEND_IMAGES_DIR ]; then
+    LAND_LEND_IMAGES_DIR="/var/land_lend/images"
+    export LAND_LEND_IMAGES_DIR
+    echo 'Set LAND_LEND_FILES_DIR env'
+fi
+
 echo 'Done!'
 
 #echo 'If environment variables not found re-run using: source set-env.sh'

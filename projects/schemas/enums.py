@@ -7,4 +7,6 @@ class RoleEnum(str, Enum):
 	security = 'security'
 	staff = 'staff'
 
-	All = 'all' # only for use in broadcast.
+class IntendedUserEnum(str, Enum):
+	ONE = 'ONE'
+	ALL = 'ALL'
