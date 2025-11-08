@@ -1,4 +1,5 @@
 from sqlmodel import SQLModel, Field, Relationship
+from fastapi import File
 from pydantic import EmailStr
 from datetime import datetime
 from .enums import RoleEnum, IntendedUserEnum
@@ -24,7 +25,7 @@ class User(UserBase, table=True):
 	hashed_password: str
 	role: RoleEnum | None = 'normal_user'
 	disabled: bool = False
-	lands: list['Land'] = Relationship(back_populates='lenders', link_model=UserLandLink)
+	lands: list['Land'] = Relationship(back_populates='renters', link_model=UserLandLink)
 
 class UserIn(UserBase):
 	password: str = Field(min_length=6)
@@ -67,7 +68,8 @@ class LandBase(SQLModel):
 
 class Land(LandBase, table=True):
 	id: int | None = Field(default=None, primary_key=True)
-	lenders: list[User] = Relationship(back_populates='lands', link_model=UserLandLink)
+	borrowed: bool = False
+	renters: list[User] = Relationship(back_populates='lands', link_model=UserLandLink)
 
 	images: list['Image'] = Relationship(back_populates='land', cascade_delete=True)
 
@@ -87,8 +89,8 @@ class LandUpdate(SQLModel):
 	location: str | None = None
 	description: str | None = None
 
-class LandOutWithUsers(LandOut):
-	lenders: list[UserOut]
+class LandOutWithUser(LandOut):
+	renters: list[UserOut]
 
 
 ################
@@ -114,10 +116,10 @@ class ImageOut(ImageBase):
 	id: int
 	url: str
 
-class ImagesUpdate(SQLModel):
-	model_config = {'extra': 'forbid'}
+# class ImagesUpdate(SQLModel):
+# 	model_config = {'extra': 'forbid'}
 
-	label: str | None = None
+# 	image: bytes = File()
 	
 
 ################

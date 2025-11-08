@@ -45,8 +45,8 @@ def get_current_active_user(user: Annotated[User, Depends(get_current_user)]):
 
 def authorize_user(role_required: list[RoleEnum]):
     def require(user: Annotated[User, Depends(get_current_active_user)]):
-        if user.role in role_required and user.role != RoleEnum.admin:
-            raise HTTPException(status_code=405, detail='User authorize.')
+        if user.role not in role_required and user.role != RoleEnum.admin:
+            raise HTTPException(status_code=401, detail='User not authorize.')
         return user
     return require
 

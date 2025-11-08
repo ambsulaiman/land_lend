@@ -51,7 +51,10 @@ async def register_chat(*,
 	session.add(new_chat)
 	session.commit()
 
-@router.get('/', response_model=list[ChatOut])
+@router.get(
+	'/',
+	response_model=list[ChatOut]
+)
 async def fetch_chats(*,
 	user: Annotated[User, Depends(get_current_active_user)],
 	skip: int = 0, limit: int = 100,
@@ -66,7 +69,10 @@ async def fetch_chats(*,
 
 	return chats
 
-@router.patch('/{chat_id}', response_model=ChatOut)
+@router.patch(
+	'/{chat_id}',
+	response_model=ChatOut
+)
 async def update_chat(
 	chat_id: int,
 	user: Annotated[User, Depends(get_current_active_user)],

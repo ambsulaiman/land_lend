@@ -9,7 +9,8 @@ from .routes import auth, users, lands, chats
 
 app = FastAPI(
 	prefix='/api/v1',
-	description='Land Lend Management System.'
+	description='Land Rent Management System.',
+	#openapi_url=None
 )
 
 @app.on_event('startup')
@@ -25,4 +26,4 @@ app.include_router(chats.router)
 
 @app.get('/')
 async def index():
-	return {'msg': 'Land Lend Management System'}
+	return {'msg': 'Land Rent Management System'}

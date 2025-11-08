@@ -31,20 +31,26 @@ async def register_user(
 
 	hashed_password = get_password_hash(user.password)
 
-	new_user = User.model_validate(user, update={'hashed_password': hashed_password, 'role': RoleEnum.admin}) # 'role': RoleEnum.admin
+	new_user = User.model_validate(user, update={'hashed_password': hashed_password}) #, 'role': RoleEnum.admin}) # for first user admin, 'role': RoleEnum.admin
 
 	session.add(new_user)
 	session.commit()
 
 	return {'msg': 'User registered successfully', 'ok': True}
 
-@router.get('/me', response_model=UserOutWithLands)
+@router.get(
+	'/me',
+	response_model=UserOutWithLands
+)
 async def get_user(
 	user: Annotated[User, Depends(get_current_active_user)]
 ):
 	return user
 
-@router.get('/{user_id}', response_model=UserOutWithLands)
+@router.get(
+	'/{user_id}',
+	response_model=UserOutWithLands
+)
 async def get_user(
 	user_id: int,
 	user: Annotated[User, Depends(get_current_active_user)],
@@ -58,7 +64,11 @@ async def get_user(
 		raise HTTPException(status_code=404, detail=f'User with id={user_id} not found.')
 	return db_user
 
-@router.get('/', dependencies=[Depends(authorize_user(RoleEnum.admin))], response_model=list[UserOutWithLands])
+@router.get(
+	'/',
+	dependencies=[Depends(authorize_user(RoleEnum.admin))],
+	response_model=list[UserOutWithLands]
+)
 async def get_users(*,
 	skip: int = 0,
 	limit: int = 100,
@@ -73,7 +83,10 @@ async def get_users(*,
 	
 	return db_users
 
-@router.patch('/', response_model=UserOut)
+@router.patch(
+	'/',
+	response_model=UserOut
+)
 async def user_update(
 	user: Annotated[User, Depends(get_current_active_user)],
 	update_data: UserUpdate,
@@ -94,7 +107,11 @@ async def user_update(
 
 	return user
 
-@router.put('/', response_model=UserOut, dependencies=[Depends(get_current_active_user)])
+@router.put(
+	'/',
+	response_model=UserOut,
+	dependencies=[Depends(get_current_active_user)]
+)
 async def user_update(
 	user_id: int,
 	update_data: UserAdminUpdate,
@@ -116,7 +133,10 @@ async def user_update(
 
 	return user
 
-@router.delete('/', response_model=dict[str, str | bool])
+@router.delete(
+	'/',
+	response_model=dict[str, str | bool]
+)
 async def delete_user(
 	user: Annotated[User, Depends(get_current_active_user)],
 	session: Annotated[Session, Depends(get_session)]
@@ -126,7 +146,11 @@ async def delete_user(
 
 	return {'msg': 'Deleted successfully!.', 'ok': True}
 
-@router.delete('/users/{user_id}', response_model=dict[str, str | bool], dependencies=[Depends(get_current_active_user)])
+@router.delete(
+	'/users/{user_id}',
+	response_model=dict[str, str | bool],
+	dependencies=[Depends(get_current_active_user)]
+)
 async def delete_user(
 	user_id: int,
 	session: Annotated[Session, Depends(get_session)]
